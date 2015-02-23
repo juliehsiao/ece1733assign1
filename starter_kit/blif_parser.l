@@ -5,6 +5,7 @@
  * Author: Tomasz Czajkowski
  * Date: October 11, 2004
  * NOTES/REVISIONS:
+#include <crtdbg.h> 
  */
 
 %{
@@ -16,7 +17,6 @@
 
 #define CRTDBG_MAP_ALLOC
 #include <stdlib.h>
-#include <crtdbg.h> 
 #include <stdlib.h>
 #include <string.h>
 #include "cubical_function_representation.h"

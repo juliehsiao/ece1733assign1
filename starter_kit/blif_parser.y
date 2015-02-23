@@ -5,6 +5,7 @@
  * Author: Tomasz Czajkowski
  * Date: October 11, 2006
  * NOTES/REVISIONS:
+#include <crtdbg.h>
  */
 
 %{
@@ -12,7 +13,6 @@
 //#define BLIF_VERBOSE
 #define CRTDBG_MAP_ALLOC
 #include <stdlib.h>
-#include <crtdbg.h>
 #include <malloc.h>
 #include <string.h>
 #include <assert.h>

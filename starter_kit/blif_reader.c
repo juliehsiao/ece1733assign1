@@ -147,14 +147,10 @@ t_blif_logic_circuit *ReadBLIFCircuit(char *filename)
 	blif_circuit->primary_input_count = 0;
 	blif_circuit->function_count = 0;
 	blif_circuit->internal_signal_count = 0;
-printf("before parse\n");
 	blif_yyparse();
-printf("1\n");
 	blif_yyrestart(blif_yyin);
-printf("2\n");
 	fclose(blif_yyin);
 
-printf("after parse\n");
 	/* If error occured then delete the circuit and return NULL */
 	if (blif_error_code != 0)
 	{
