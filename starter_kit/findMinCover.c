@@ -4,7 +4,7 @@
 #include "findMinCover.h"
 #include "cubical_function_representation.h"
 
-void findMinCover (bool **coverTable, int numPIs, int numMinterms) {
+void findMinCover (bool **coverTable, int numPIs, int numMinterms,t_blif_cubical_function *f) {
     
     // [1] setup validMinterms, validPIs
     bool * validPIs = (bool *) malloc(numPIs * sizeof(bool));
@@ -96,7 +96,7 @@ void findEssentialPIs (bool **coverTable, int *minterms, int numMinterms,
 		}
 	}
 
-	printf("Found %d essential PIs\n", EPIIndex);
+	printf("Found %d essential PIs\n", EPIIndex); //TODO: return this value? or pass f->cube_count to this function to update it here?
 	// TODO: need to append the essentialPIs to the cover
 	
 	// Now copy back the new valid lists back

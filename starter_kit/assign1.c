@@ -201,7 +201,7 @@ void simplify_function(t_blif_cubical_function *f)
     //=====================================================
     // [4] find all minimal covers
     //=====================================================
-    findMinCover(coverTable, f->cube_count, numMinTerms);
+    findMinCover(coverTable, f->cube_count, numMinTerms, f);
 
 
 
