@@ -118,7 +118,11 @@ void printCoverTable(bool **coverTable, int numRows, int numCols)
     int i, j;
     for(i = 0; i < numRows; i++) {
         for(j = 0; j < numCols; j++) {
-            printf("| %c ", (coverTable[i][j])?('v'):(' '));
+            //printf("| %s%c%s ", BGRN, (coverTable[i][j])?(tick):(' '), KEND);
+			printf("| ");
+			if (coverTable[i][j]) printf("%s\xE2\x9C\x93%s", BRED, KEND);
+			else printf(" ");
+			printf(" ");
         }
         printf("|\n");
     }
@@ -163,6 +167,7 @@ void simplify_function(t_blif_cubical_function *f)
             minTermIndex = enumerateAllMinterms(f->set_of_cubes[i], minterms, minTermIndex, f->input_count); 
         }
     }
+	numMinTerms = minTermIndex;
 
     //=====================================================
     // [2] merge cubes to set of PIs
@@ -170,6 +175,8 @@ void simplify_function(t_blif_cubical_function *f)
     t_blif_cube ** PIs = (t_blif_cube **) malloc (f->cube_count * sizeof(t_blif_cube *));
     findPI(f, PIs); //f->set_of_cubes will be freed in findPI, PIs is the only valid list
     f->set_of_cubes = PIs;
+
+	// Highlight the final PIs as BLUE
     printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
 
     //=====================================================

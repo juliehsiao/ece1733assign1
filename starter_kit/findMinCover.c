@@ -13,7 +13,8 @@ void findMinCover (bool **coverTable, int numPIs, int numMinterms, t_blif_cubica
     bool * validMinterms = (bool *) malloc(numMinterms * sizeof(bool));
     memset(validMinterms, true, numMinterms * sizeof(bool));
 
-	t_blif_cube **essentialPIs = (t_blif_cube **) malloc (numPIs * sizeof(t_blif_cube *));
+	t_blif_cube **essentialPIs = (t_blif_cube **) malloc ((numPIs) * sizeof(t_blif_cube *));
+	printf("Allocate essentialPIs[%d]\n", numPIs);
     int EPIIndex = 0;
 
     bool emptyChanged   = true;
@@ -104,50 +105,53 @@ bool findEssentialPIs (bool **coverTable, int numMinterms, bool *validMinterms, 
 		}
 	}
 
-	printf("There are %d valid PIs\n", numValidPIs);
-
 	// Create temporary valid lists and copy the previous valid lists into them
 	bool *newValidMinterms = (bool *) malloc (numMinterms * sizeof(bool));
 	bool *newValidPIs = (bool *) malloc (numPIs * sizeof(bool));
 	memcpy (newValidMinterms, validMinterms, numMinterms * sizeof(bool));
 	memcpy (newValidPIs, validPIs, numPIs * sizeof(bool));
 
-	// Iterate through each minterm, a PI is essential if it is the only PI
-	// that covers the minterm
-	for (i = 0; i < numMinterms; i++) { // col of minterms
-		if (validMinterms[i] == false) continue;
-		int numCovered = 0;
-		int index = 0;
-		for (j = 0; j < numPIs; j++) {
-			if (validPIs[j] == false) continue;
-			if (coverTable[j][i] == true) {
-				numCovered++;
-				index = j;
+	// Iterate through each PI, it is essential if it covers a minterm that is not covered by any other PI
+	for (i = 0; i < numPIs; i++) {
+		if (validPIs[i] == false) continue;
+		bool essential;
+		for (j = 0; j < numMinterms; j++) {
+			if (validMinterms[j] == false || coverTable[i][j] == false) continue;
+			essential = true;
+			for (k = 0; k < numPIs; k++) {
+				if (i == k) continue;
+				if (coverTable[k][j]) {
+					essential = false;
+				}
 			}
+			if (essential) break;
 		}
-		if (numCovered == 1) { // An essential PI is found
+		if (essential) {
 			// add essential PI to list
 			essentialPIs[EPIIndex] = (t_blif_cube *) malloc (sizeof(t_blif_cube));
-			essentialPIs[EPIIndex++][0] = PIs[index][0];
+			essentialPIs[EPIIndex++][0] = PIs[i][0];
             changed = true;
 
 			// invalidate the PI and all minterm covered by the EPI to reduce the table
-			newValidPIs[index] = false;
+			newValidPIs[i] = false;
 
 			for (k = 0; k < numMinterms; k++) {
-				if (coverTable[index][k] == true) newValidMinterms[k] = false;
+				if (coverTable[i][k] == true) {
+					//printf("newValidMinterms[%d] = false\t\t0x%x\n", k, &newValidMinterms[k]);
+					newValidMinterms[k] = false;
+				}
 			}
 		}
 	}
 
-	printf("Found %d essential PIs\n", EPIIndex); 
-	
+	printf("%sFound %d essential PIs%s\n", BGRN, EPIIndex, KEND); 
+
 	// Now copy back the new valid lists back
 	memcpy (validMinterms, newValidMinterms, numMinterms * sizeof(bool));
 	memcpy (validPIs, newValidPIs, numPIs * sizeof(bool));
 
-	free(newValidMinterms);
 	free(newValidPIs);
+	free(newValidMinterms);
 
     return changed;
 }
