@@ -129,5 +129,6 @@ void                    freeSetOfCubes (t_blif_cube **cubes, int cube_count);
 void                    printCube(t_blif_cube *cube, int numInputs);
 void                    printSetOfCubes(t_blif_cube **cubes, int numInputs, int numCubes);
 bool isRedundantPI(t_blif_cube **PIs, int inputCount, int listSize, t_blif_cube *newPI);
+int                     enumerateAllMinterms(t_blif_cube * cube, int *mintermArray, int startIndex, int input_count);
 
 #endif

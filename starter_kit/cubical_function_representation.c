@@ -165,8 +165,8 @@ char translateLiterals(int literal)
 {
     char ret = ' ';
     if(literal == LITERAL_0) ret = '0';
-    if(literal == LITERAL_1) ret = '1';
-    if(literal == LITERAL_DC) ret = 'X';
+    else if(literal == LITERAL_1) ret = '1';
+    else if(literal == LITERAL_DC) ret = 'X';
     return ret;
 }
 
@@ -192,5 +192,38 @@ void printSetOfCubes(t_blif_cube **cubes, int numInputs, int numCubes)
     }
     printf("=====================\n");
 }
+
+// returns index of the next free spot
+int enumerateAllMinterms(t_blif_cube * cube, int *mintermArray, int startIndex, int input_count)
+{
+    int numX = 0;
+    int val = 0;
+    int pos[64] = {0};
+    int posIndex = 0;
+    int j, i;
+    for(j = 0; j < input_count; j++) {
+        if(read_cube_variable(cube->signal_status, j) == LITERAL_DC) {
+            numX++;
+            pos[posIndex++] = input_count - 1 - j;
+        }
+        else {
+           val += (read_cube_variable(cube->signal_status, j) == LITERAL_1) << (input_count - 1 - j);
+        }
+    }
+
+    for(j = 0; j < (1 << numX); j++) {
+        mintermArray[startIndex] = val;
+        for(i = 0; i < numX; i++) {
+            mintermArray[startIndex] += (j & (1 << i)) << pos[i];
+        }
+        printf("**%d\t", mintermArray[startIndex]);
+        startIndex++;
+    }
+    printf("\n");
+    return startIndex;
+}
+
+
+
 
 

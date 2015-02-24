@@ -124,12 +124,38 @@ void simplify_function(t_blif_cubical_function *f)
  * The number of cubes is stored in the field cube_count.
  */
 {
+    // store the minterms for step 3
+    int numMinTerms = 0;
+    int i, j;
+    for(i = 0; i < f->cube_count; i++)
+    {
+        if(!f->set_of_cubes[i]->is_DC)
+        {
+            int numX = 0;
+            for(j = 0; j < f->input_count; j++) {
+                if(read_cube_variable(f->set_of_cubes[i]->signal_status, j) == LITERAL_DC) {
+                    numX++;
+                }
+            }
+            numMinTerms+= (1 << numX);
+        }
+    }
+    int * minterms = (int *) malloc((numMinTerms + 1) * sizeof(int));
+    int minTermIndex = 0;
     printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
+
+    for(i = 0; i < f->cube_count; i++) {
+        if (!f->set_of_cubes[i]->is_DC) {
+            minTermIndex = enumerateAllMinterms(f->set_of_cubes[i], minterms, minTermIndex, f->input_count); 
+        }
+    }
+
 	/* PUT YOUR CODE HERE */
     t_blif_cube ** PIs = (t_blif_cube **) malloc (f->cube_count * sizeof(t_blif_cube *));
     findPI(f, PIs);
     f->set_of_cubes = PIs;
-    printSetOfCubes(PIs, f->input_count, f->cube_count);
+    printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
+    //printSetOfCubes(PIs, f->input_count, f->cube_count);
 }
 
 
