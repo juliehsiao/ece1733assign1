@@ -113,15 +113,40 @@ int cover_cost(t_blif_cube **cover, int num_cubes, int num_inputs)
 /**********************************************************************/
 /*** helper functions for MINIMIZATION CODE ***************************/
 /**********************************************************************/
-void printCoverTable(bool **coverTable, int numRows, int numCols)
+void printCoverTable(bool **coverTable, int numRows, int numCols, int *minterms)
 {
     int i, j;
+    printf("**********************************************\n");
+    for(j = 0; j < numCols; j++) {
+        printf("|%2d ", minterms[j]);
+    }
+    printf("|\n");
     for(i = 0; i < numRows; i++) {
         for(j = 0; j < numCols; j++) {
             printf("| %c ", (coverTable[i][j])?('v'):(' '));
         }
         printf("|\n");
     }
+    printf("**********************************************\n");
+}
+
+void printValidCoverTable(bool **coverTable, int numRows, int numCols, 
+        bool *validPIs, bool*validMinterms)
+{
+    int i, j;
+    printf("**********************************************\n");
+    for(i = 0; i < numRows; i++) {
+        for(j = 0; j < numCols; j++) {
+            if(validPIs[i] && validMinterms[j]) {
+                printf("| %c ", (coverTable[i][j])?('v'):(' '));
+            }
+            else {
+                printf("|---");
+            }
+        }
+        printf("|\n");
+    }
+    printf("**********************************************\n");
 }
 
 /**********************************************************************/
@@ -163,6 +188,7 @@ void simplify_function(t_blif_cubical_function *f)
             minTermIndex = enumerateAllMinterms(f->set_of_cubes[i], minterms, minTermIndex, f->input_count); 
         }
     }
+    numMinTerms = minTermIndex;
 
     //=====================================================
     // [2] merge cubes to set of PIs
@@ -178,21 +204,23 @@ void simplify_function(t_blif_cubical_function *f)
     bool **coverTable = (bool **) malloc( f->cube_count * sizeof(bool *) );
     for(i = 0; i < f->cube_count; i++) {
         coverTable[i] = (bool *) malloc( numMinTerms * sizeof(bool) );
-        memset(coverTable[i], false, numMinTerms * sizeof(bool) );
+        memset(coverTable[i], false, numMinTerms);
     }
 
     for(i = 0; i < f->cube_count; i++) {
         int PICovers[64] = {0};
         int numCovered = enumerateAllMinterms(f->set_of_cubes[i], PICovers, 0, f->input_count);
         for(j = 0; j < numCovered; j++) {
+            printf("**%d  ", PICovers[j]);
             for(k = 0; k < numMinTerms; k++) {
                 if(minterms[k] == PICovers[j]) {
                     coverTable[i][k] = true;
                 }
             }    
         }
-    }
-    printCoverTable(coverTable, f->cube_count, numMinTerms);
+printf("\n");
+    } 
+    printCoverTable(coverTable, f->cube_count, numMinTerms, minterms);
 
     //=====================================================
     // [4] find all minimal covers

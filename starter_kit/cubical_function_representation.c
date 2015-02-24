@@ -192,7 +192,8 @@ void printSetOfCubes(t_blif_cube **cubes, int numInputs, int numCubes)
     printf("=====================\n");
 }
 
-// returns index of the next free spot
+// given a cube, returns all cubes represented by that cube in an int array
+// - returns index of the next free spot
 int enumerateAllMinterms(t_blif_cube * cube, int *mintermArray, int startIndex, int input_count)
 {
     int numX = 0;
@@ -200,8 +201,8 @@ int enumerateAllMinterms(t_blif_cube * cube, int *mintermArray, int startIndex, 
     int pos[64] = {0};
     int posIndex = 0;
     int j, i;
-    for(j = 0; j < input_count; j++) {
-        if(read_cube_variable(cube->signal_status, j) == LITERAL_DC) {
+    for(j = 0; j < input_count; j++) {  // for each bit of the cube
+        if(read_cube_variable(cube->signal_status, j) == LITERAL_DC) { //if it is a DC
             numX++;
             pos[posIndex++] = input_count - 1 - j;
         }
@@ -213,7 +214,7 @@ int enumerateAllMinterms(t_blif_cube * cube, int *mintermArray, int startIndex, 
     for(j = 0; j < (1 << numX); j++) {
         mintermArray[startIndex] = val;
         for(i = 0; i < numX; i++) {
-            mintermArray[startIndex] += (j & (1 << i)) << pos[i];
+            mintermArray[startIndex] += (j & (1 << i)) >> i << pos[i];
         }
         //printf("**%d\t", mintermArray[startIndex]);
         startIndex++;
