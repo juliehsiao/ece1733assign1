@@ -156,6 +156,7 @@ void simplify_function(t_blif_cubical_function *f)
             numMinTerms+= (1 << numX);
         }
     }
+
     int * minterms = (int *) malloc((numMinTerms + 1) * sizeof(int));
     int minTermIndex = 0;
     printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
@@ -170,10 +171,9 @@ void simplify_function(t_blif_cubical_function *f)
     // [2] merge cubes to set of PIs
     //=====================================================
     t_blif_cube ** PIs = (t_blif_cube **) malloc (f->cube_count * sizeof(t_blif_cube *));
-    findPI(f, PIs);
+    findPI(f, PIs); //f->set_of_cubes will be freed in findPI, PIs is the only valid list
     f->set_of_cubes = PIs;
     printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
-    //printSetOfCubes(PIs, f->input_count, f->cube_count);
 
     //=====================================================
     // [3] construct the cover table
@@ -195,8 +195,15 @@ void simplify_function(t_blif_cubical_function *f)
             }    
         }
     }
-    
     printCoverTable(coverTable, f->cube_count, numMinTerms);
+
+    //=====================================================
+    // [4] find all minimal covers
+    //=====================================================
+
+
+
+
 
 }
 

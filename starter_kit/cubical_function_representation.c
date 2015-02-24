@@ -107,7 +107,7 @@ void free_cubical_function(t_blif_cubical_function *f)
 	}
 }
 
-
+// takes a list of PI and a newPI, and return whether the newPI exists in the list already
 bool isRedundantPI(t_blif_cube **PIs, int inputCount, int listSize, t_blif_cube *newPI)
 {
     int i, j;
@@ -127,10 +127,10 @@ bool isRedundantPI(t_blif_cube **PIs, int inputCount, int listSize, t_blif_cube 
     return false;
 }
 
-
+// takes 2 cubes and try to merge them
+// - returns a newly allocated cube if merge was successful, otherwise NULL
 t_blif_cube *mergeImplicants(t_blif_cube *c1, t_blif_cube *c2, int size)
 {
-//printf("size=%d\n", size);
     t_blif_cube *ret = NULL;
     int i, pos;
     int numDiff = 0;
@@ -148,7 +148,6 @@ t_blif_cube *mergeImplicants(t_blif_cube *c1, t_blif_cube *c2, int size)
 
     // change the one bit that's diff
     write_cube_variable(ret->signal_status, pos, LITERAL_DC);
-printf("merging\n");
     return ret;
 }
 
