@@ -19,6 +19,7 @@
 #include "blif_common.h"
 #include "cubical_function_representation.h"
 #include "findPI.h"
+#include "findMinCover.h"
 
 /**********************************************************************/
 /*** DATA STRUCTURES DECLARATIONS *************************************/
@@ -200,7 +201,7 @@ void simplify_function(t_blif_cubical_function *f)
     //=====================================================
     // [4] find all minimal covers
     //=====================================================
-
+    findMinCover(coverTable, f->cube_count, numMinTerms);
 
 
 
