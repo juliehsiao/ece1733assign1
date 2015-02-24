@@ -123,7 +123,11 @@ void printCoverTable(bool **coverTable, int numRows, int numCols, int *minterms)
     printf("|\n");
     for(i = 0; i < numRows; i++) {
         for(j = 0; j < numCols; j++) {
-            printf("| %c ", (coverTable[i][j])?('v'):(' '));
+            //printf("| %s%c%s ", BGRN, (coverTable[i][j])?(tick):(' '), KEND);
+			printf("| ");
+			if (coverTable[i][j]) printf("%s\xE2\x9C\x93%s", BRED, KEND);
+			else printf(" ");
+			printf(" ");
         }
         printf("|\n");
     }
@@ -211,7 +215,6 @@ void simplify_function(t_blif_cubical_function *f)
         int PICovers[64] = {0};
         int numCovered = enumerateAllMinterms(f->set_of_cubes[i], PICovers, 0, f->input_count);
         for(j = 0; j < numCovered; j++) {
-            printf("**%d  ", PICovers[j]);
             for(k = 0; k < numMinTerms; k++) {
                 if(minterms[k] == PICovers[j]) {
                     coverTable[i][k] = true;
