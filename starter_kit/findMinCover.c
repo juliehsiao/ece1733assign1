@@ -5,6 +5,16 @@
 #include "cubical_function_representation.h"
 
 void findMinCover () {
+    
+    // [1] setup validMinterms, validPIs
+    // [2] remove empty rows
+    // [3] call findEssentialPIs
+    // [4] check if function is covered
+    // [5] call row dominance function
+    // [6] check if function is covered
+    // [7] call column dominance function
+    // [8] check if function is covered
+    // [9] repeat from 2
 	return;
 }
 
@@ -88,3 +98,53 @@ bool isCovered (bool *validMinterms, int numMinterms) {
 void removeDominatedRow () {
 	return;
 }
+
+
+
+void removeDominatedCol(bool **coverTable, int numRows, int numCols, bool *validPIs, bool *validMinterms) {
+    
+	// Create temporary valid lists and copy the previous valid lists into them
+	bool *newValidMinterms = (bool *) malloc (numCols * sizeof(bool));
+	memcpy (newValidMinterms, validMinterms, numCols * sizeof(bool));
+
+    int i, j, k;
+	// Iterate through each minterm, a minterm is dominated if there is another minterm is the superset of it 
+	for (i = 0; i < numCols; i++) { // column 1
+		if (validMinterms[i] == false) continue;
+		int numCovered1 = 0;
+		for (k = 0; k < numRows; k++) {
+			if (validPIs[k] == false) continue;
+			if (coverTable[k][i] == true) {
+				numCovered1++;
+			}
+        }
+		int numCovered2 = 0;
+	    for (j = i+1; j < numCols; j++) { // column 2
+            numCovered2 = 0;
+		    for (k = 0; k < numRows; k++) {
+			    if (validPIs[k] == false) continue;
+			    if (coverTable[k][j] == true) {
+			    	numCovered2++;
+			    }
+            }
+		}
+        int dominator = (numCovered1 < numCovered2)?(i):(j);
+        int dominated = (numCovered1 < numCovered2)?(j):(i);
+        bool isDominated = true;
+        for(k = 0; k < numRows; k++) {
+			if (validPIs[k] == false) continue;
+			if ( (coverTable[k][dominator] == true) && (coverTable[k][dominated] == false) ) {
+		        isDominated = false;
+			}
+        }
+        
+        if(isDominated) {
+            newValidMinterms[dominated] = false; 
+	        printf("Dominated col %d with col %d \n", dominated, dominator);
+        }
+	}
+
+	memcpy (validMinterms, newValidMinterms, numCols * sizeof(bool));
+	free(newValidMinterms);
+}
+
