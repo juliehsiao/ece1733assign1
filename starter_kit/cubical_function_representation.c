@@ -107,3 +107,90 @@ void free_cubical_function(t_blif_cubical_function *f)
 	}
 }
 
+
+bool isRedundantPI(t_blif_cube **PIs, int inputCount, int listSize, t_blif_cube *newPI)
+{
+    int i, j;
+
+    for(i = 0; i < listSize; i++)
+    {
+        bool isRedundant = true;
+        for(j = 0; j < inputCount; j++) {
+            if(read_cube_variable(PIs[i]->signal_status, j) != read_cube_variable(newPI->signal_status, j)) {
+                isRedundant = false;
+                break;
+            }
+        
+        }
+        if((j==inputCount) && isRedundant) return true;
+    }
+    return false;
+}
+
+
+t_blif_cube *mergeImplicants(t_blif_cube *c1, t_blif_cube *c2, int size)
+{
+//printf("size=%d\n", size);
+    t_blif_cube *ret = NULL;
+    int i, pos;
+    int numDiff = 0;
+    for (i = 0; i < size; i++) {
+//        printf("c1[%d] = %d, c2[%d] = %d\n", i, read_cube_variable(c1->signal_status, i), i,  read_cube_variable(c2->signal_status, i));
+        if (read_cube_variable(c1->signal_status, i) != read_cube_variable(c2->signal_status, i)) {
+            numDiff++;
+            pos = i;
+        }
+        if (numDiff > 1) return NULL;
+    }
+
+    ret = (t_blif_cube *) malloc (sizeof(t_blif_cube));
+    memcpy(ret, c1, sizeof(t_blif_cube));
+
+    // change the one bit that's diff
+    write_cube_variable(ret->signal_status, pos, LITERAL_DC);
+printf("merging\n");
+    return ret;
+}
+
+void freeSetOfCubes (t_blif_cube **cubes, int cube_count)
+{
+    int i;
+    for (i = 0; i < cube_count; i++) {
+        free(cubes[i]);
+    }
+    free(cubes);
+}
+
+char translateLiterals(int literal)
+{
+    char ret = ' ';
+    if(literal == LITERAL_0) ret = '0';
+    if(literal == LITERAL_1) ret = '1';
+    if(literal == LITERAL_DC) ret = 'X';
+    return ret;
+}
+
+void printCube(t_blif_cube *cube, int numInputs)
+{
+    int j;
+    for(j = 0; j < numInputs; j++) {
+        printf("%c ", translateLiterals(read_cube_variable(cube->signal_status, j)));
+    }
+    printf("\n");
+    
+}
+
+void printSetOfCubes(t_blif_cube **cubes, int numInputs, int numCubes)
+{
+    int i, j;
+    printf("=====================\n");
+    for(i = 0; i < numCubes; i++) {
+        for(j = 0; j < numInputs; j++) {
+            printf("%c ", translateLiterals(read_cube_variable(cubes[i]->signal_status, j)));
+        }
+        printf("\n");
+    }
+    printf("=====================\n");
+}
+
+

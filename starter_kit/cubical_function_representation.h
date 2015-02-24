@@ -19,7 +19,7 @@
 //#include <conio.h>
 #include <malloc.h>
 #include "common_types.h"
-
+#include <stdbool.h>
 
 /*****************************************************/
 /*** DATA STRUCTURES *********************************/
@@ -124,5 +124,10 @@ typedef struct s_blif_logic_circuit {
 void					free_cubical_function(t_blif_cubical_function *f);
 int						read_cube_variable(long int *cube, int var_index);
 void					write_cube_variable(long int *cube, int var_index, int value);
+t_blif_cube *           mergeImplicants(t_blif_cube *c1, t_blif_cube *c2, int size);
+void                    freeSetOfCubes (t_blif_cube **cubes, int cube_count);
+void                    printCube(t_blif_cube *cube, int numInputs);
+void                    printSetOfCubes(t_blif_cube **cubes, int numInputs, int numCubes);
+bool isRedundantPI(t_blif_cube **PIs, int inputCount, int listSize, t_blif_cube *newPI);
 
 #endif

@@ -18,6 +18,7 @@
 #include "common_types.h"
 #include "blif_common.h"
 #include "cubical_function_representation.h"
+#include "findPI.h"
 
 /**********************************************************************/
 /*** DATA STRUCTURES DECLARATIONS *************************************/
@@ -123,7 +124,12 @@ void simplify_function(t_blif_cubical_function *f)
  * The number of cubes is stored in the field cube_count.
  */
 {
+    printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
 	/* PUT YOUR CODE HERE */
+    t_blif_cube ** PIs = (t_blif_cube **) malloc (f->cube_count * sizeof(t_blif_cube *));
+    findPI(f, PIs);
+    f->set_of_cubes = PIs;
+    printSetOfCubes(PIs, f->input_count, f->cube_count);
 }
 
 

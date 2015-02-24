@@ -8,7 +8,8 @@ SOURCES = 	assign1.c \
 			blif_parser.tab.c \
 			blif_parser.c \
 		  	blif_reader.c \
-		  	cubical_function_representation.c
+		  	cubical_function_representation.c \
+		  	findPI.c
 
 OBJECTS = $(SOURCES:.c=.o)
 EXECUTABLE = assign1
@@ -36,6 +37,8 @@ common_types.o: common_types.c
 cubical_function_representation.o: cubical_function_representation.c
 	$(GCC) $(CFLAGS) cubical_function_representation.c
 
+findPI.o: findPI.c
+	$(GCC) $(CFLAGS) findPI.c
 
 clean:
 	rm -rf $(OBJECTS) $(EXECUTABLE)
