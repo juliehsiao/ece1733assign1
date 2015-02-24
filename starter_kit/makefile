@@ -9,6 +9,7 @@ SOURCES = 	assign1.c \
 			blif_parser.c \
 		  	blif_reader.c \
 		  	cubical_function_representation.c \
+		  	findMinCover.c \
 		  	findPI.c
 
 OBJECTS = $(SOURCES:.c=.o)
@@ -39,6 +40,9 @@ cubical_function_representation.o: cubical_function_representation.c
 
 findPI.o: findPI.c
 	$(GCC) $(CFLAGS) findPI.c
+
+findMinCover.o: findMinCover.c
+	$(GCC) $(CFLAGS) findMinCover.c
 
 clean:
 	rm -rf $(OBJECTS) $(EXECUTABLE)

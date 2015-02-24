@@ -1,7 +1,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
-#include "findMinCover.h"
+//#include "findMinCover.h"
+#include "cubical_function_representation.h"
 
 void findMinCover () {
 	return;
