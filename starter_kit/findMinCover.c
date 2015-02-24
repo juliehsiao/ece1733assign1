@@ -1,12 +1,17 @@
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
-//#include "findMinCover.h"
+#include "findMinCover.h"
 #include "cubical_function_representation.h"
 
-void findMinCover () {
+void findMinCover (bool **coverTable, int numPIs, int numMinterms) {
     
     // [1] setup validMinterms, validPIs
+    bool * validPIs = (bool *) malloc(numPIs * sizeof(bool));
+    memset(validPIs, true, numPIs * sizeof(bool));
+    bool * validMinterms = (bool *) malloc(numMinterms * sizeof(bool));
+    memset(validMinterms, true, numMinterms * sizeof(bool));
+
     // [2] remove empty rows
     // [3] call findEssentialPIs
     // [4] check if function is covered
@@ -16,6 +21,27 @@ void findMinCover () {
     // [8] check if function is covered
     // [9] repeat from 2
 	return;
+}
+
+// marks any PI (row) that doesn't cover a remaining minterm as invalid
+void removeEmptyRow(bool **coverTable, int numCols, int numRows, bool *validPIs, bool *validMinterms)
+{
+    bool isEmpty = true;
+    int i, j;
+    for(i = 0; i < numRows; i++) { //for every PI
+        if(!validPIs[i]) continue;
+        isEmpty = true;
+        for(j = 0; ((j < numCols) && isEmpty); j++) { //check with every minterm (until we find that it's not empty)
+            if(!validMinterms[j]) continue;
+            if(coverTable[i][j]) { //if this PI covers a valid minterm, then the row is not empty
+                isEmpty = false;
+            }
+        }
+
+        if(isEmpty) { // if this PI doesn't cover any of the remaining minterms, mark it as invalid 
+            validPIs[i] = false;
+        }
+    }
 }
 
 // Inserts essential PIs into list and "reduces" the cover table
