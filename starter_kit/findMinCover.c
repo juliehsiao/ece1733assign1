@@ -95,12 +95,50 @@ bool isCovered (bool *validMinterms, int numMinterms) {
 }
 
 
-void removeDominatedRow () {
-	return;
+// Dominated Row has less ticks
+// Rows of PIs, Cols of Minterms
+void removeDominatedRow (bool **coverTable, int numRows, int numCols, bool *validPIs, bool *validMinterms, int numInputs, t_blif_cube **set_of_cubes) {
+	
+	// Create temporary valid lists and copy the previous valid lists into them`
+	bool *newValidPIs = (bool *) malloc (numRows * sizeof(bool));
+	memcpy (newValidPIs, validPIs, numRows * sizeof(bool));
+
+	bool jDomI = false;
+	int i, j, k;
+	// Iterate through each PI, a PI is dominated if:
+	// There exists another PI that covers all the minterms it covers and more
+	// A row is removed if it is dominated by another row AND the cost of the PI and the dominating PI
+	// are the same
+	for (i = 0; i < numRows; i++) {
+		if (validPIs[i] == false) continue;
+		for (j = 0; j < numRows; j++) {
+			if (validPIs[j] == false) continue;
+			// Compare two valid PI rows i and j, check to see if j dominates i
+			for (k = 0; k < numCols; k++) {
+				if (validMinterms[k] == false) continue;
+				if (coverTable[i][k] && !coverTable[j][k]) {
+					// row i covers a minterm not covered by j
+					jDomI = false;
+					break;
+				}
+				if (!coverTable[i][k] && coverTable[j][k]) {
+					jDomI = true;
+				}
+			}
+			// Only remove the dominated row (i) if the cost of PI[i] >= PI[j]
+			if (jDomI && (cube_cost(set_of_cubes[i], numInputs) >= cube_cost(set_of_cubes[j], numInputs))) {
+				newValidPIs[i] = false;
+			}
+		}
+	}
+
+	// Update and free the valid list
+	memcpy (validPIs, newValidPIs, numRows * sizeof(bool));
+	free(newValidPIs);
 }
 
 
-
+// Dominated Col has more ticks
 void removeDominatedCol(bool **coverTable, int numRows, int numCols, bool *validPIs, bool *validMinterms) {
     
 	// Create temporary valid lists and copy the previous valid lists into them
