@@ -216,10 +216,10 @@ int enumerateAllMinterms(t_blif_cube * cube, int *mintermArray, int startIndex, 
         for(i = 0; i < numX; i++) {
             mintermArray[startIndex] += (j & (1 << i)) << pos[i];
         }
-        printf("**%d\t", mintermArray[startIndex]);
+        //printf("**%d\t", mintermArray[startIndex]);
         startIndex++;
     }
-    printf("\n");
+    //printf("\n");
     return startIndex;
 }
 
