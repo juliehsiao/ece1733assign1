@@ -155,6 +155,12 @@ void simplify_function(t_blif_cubical_function *f)
  * The number of cubes is stored in the field cube_count.
  */
 {
+	
+	if (f->set_of_cubes == NULL) {
+		printf("%sWarning: No cubes in function! Skipping...\n%s", BYEL, KEND);
+		return;
+	}
+
     //=====================================================
     // [1] store the minterms for use later
     //=====================================================
@@ -218,9 +224,6 @@ void simplify_function(t_blif_cubical_function *f)
     // [4] find all minimal covers
     //=====================================================
     findMinCover(coverTable, f->cube_count, numMinTerms, f, minterms);
-
-
-
 
 }
 
