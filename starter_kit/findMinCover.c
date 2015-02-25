@@ -248,8 +248,10 @@ bool removeDominatedCol(bool **coverTable, int numRows, int numCols, bool *valid
     int i, j, k;
     bool changed = false;
 	// Iterate through each minterm, a minterm is dominated if there is another minterm is the superset of it 
-	for (i = 0; i < numCols; i++) { // column 1
-		if (validMinterms[i] == false) continue;
+	for (i = 0; i < numCols; i++) { // for every column
+		if (validMinterms[i] == false) continue; //skip if it's not valid
+
+        // calculate the number of PIs that covers it
 		int numCovered1 = 0;
 		for (k = 0; k < numRows; k++) {
 			if (validPIs[k] == false) continue;
@@ -257,8 +259,11 @@ bool removeDominatedCol(bool **coverTable, int numRows, int numCols, bool *valid
 				numCovered1++;
 			}
         }
+
 		int numCovered2 = 0;
-	    for (j = i+1; j < numCols; j++) { // column 2
+	    for (j = i+1; j < numCols; j++) { // look at each of the subsequent columns
+		    if (validMinterms[j] == false) continue; //skip if it's not valid
+            // calculate the number of PIs that covers it
             numCovered2 = 0;
 		    for (k = 0; k < numRows; k++) {
 			    if (validPIs[k] == false) continue;
@@ -266,22 +271,23 @@ bool removeDominatedCol(bool **coverTable, int numRows, int numCols, bool *valid
 			    	numCovered2++;
 			    }
             }
+
+            int dominator = (numCovered1 < numCovered2)?(i):(j); //minterm with less PIs covering it is the domincator (stays)
+            int dominated = (numCovered1 < numCovered2)?(j):(i); // minterm with more PIs covering it is dominated (removed)
+            bool isDominated = true;
+            for(k = 0; k < numRows; k++) {
+		    	if (validPIs[k] == false) continue;
+		    	if ( (coverTable[k][dominator] == true) && (coverTable[k][dominated] == false) ) {
+		            isDominated = false;
+		    	}
+            }
+            
+            if(isDominated) {
+                newValidMinterms[dominated] = false; 
+                changed = true;
+	            printf("Dominated col %d with col %d \n", dominated, dominator);
+            }
 		}
-        int dominator = (numCovered1 < numCovered2)?(i):(j);
-        int dominated = (numCovered1 < numCovered2)?(j):(i);
-        bool isDominated = true;
-        for(k = 0; k < numRows; k++) {
-			if (validPIs[k] == false) continue;
-			if ( (coverTable[k][dominator] == true) && (coverTable[k][dominated] == false) ) {
-		        isDominated = false;
-			}
-        }
-        
-        if(isDominated) {
-            newValidMinterms[dominated] = false; 
-            changed = true;
-	        printf("Dominated col %d with col %d \n", dominated, dominator);
-        }
 	}
 
 	memcpy (validMinterms, newValidMinterms, numCols * sizeof(bool));

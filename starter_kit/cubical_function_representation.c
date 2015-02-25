@@ -214,7 +214,7 @@ int enumerateAllMinterms(t_blif_cube * cube, int *mintermArray, int startIndex, 
         for(i = 0; i < numX; i++) {
             mintermArray[startIndex] += (j & (1 << i)) >> i << pos[i];
         }
-        //printf("**%d\t", mintermArray[startIndex]);
+        // check if this newly added term is present in array already
         startIndex++;
     }
     //printf("\n");
