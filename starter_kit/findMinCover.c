@@ -55,7 +55,7 @@ void findMinCover (bool **coverTable, int numPIs, int numMinterms, t_blif_cubica
             printf("[removed dominated rows]\n");
             printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
             // [6] try to findEssentialPIs again
-            ePIChanged = ePIChanged || findEssentialPIs (coverTable, numMinterms, validMinterms, f->set_of_cubes, essentialPIs, &EPIIndex, numPIs, validPIs);
+            ePIChanged = findEssentialPIs (coverTable, numMinterms, validMinterms, f->set_of_cubes, essentialPIs, &EPIIndex, numPIs, validPIs) || ePIChanged;
             if(isCovered (validMinterms, numMinterms)) {
                 done = true;
                 break;
@@ -69,7 +69,7 @@ void findMinCover (bool **coverTable, int numPIs, int numMinterms, t_blif_cubica
             printf("[removed dominated columns]\n");
             printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
             // [8] try to findEssentialPIs again
-            ePIChanged = ePIChanged || findEssentialPIs (coverTable, numMinterms, validMinterms, f->set_of_cubes, essentialPIs, &EPIIndex, numPIs, validPIs);
+            ePIChanged = findEssentialPIs (coverTable, numMinterms, validMinterms, f->set_of_cubes, essentialPIs, &EPIIndex, numPIs, validPIs) || ePIChanged;
             if(isCovered (validMinterms, numMinterms)) {
                 done = true;
                 break;
@@ -122,14 +122,6 @@ bool findEssentialPIs (bool **coverTable, int numMinterms, bool *validMinterms, 
 	int i, j, k;
     bool changed = false;
 
-	// At most as many essential PIs as valid PIs
-	int numValidPIs = 0;
-	for (i = 0; i < numPIs; i++) {
-		if (validPIs[i]) {
-			numValidPIs++;
-		}
-	}
-
 	// Create temporary valid lists and copy the previous valid lists into them
 	bool *newValidMinterms = (bool *) malloc (numMinterms * sizeof(bool));
 	bool *newValidPIs = (bool *) malloc (numPIs * sizeof(bool));
@@ -145,7 +137,7 @@ bool findEssentialPIs (bool **coverTable, int numMinterms, bool *validMinterms, 
 			essential = true;
 			for (k = 0; k < numPIs; k++) {
 				if (i == k) continue;
-				if (coverTable[k][j]) {
+				if (coverTable[k][j] && validMinterms[k] == true) {
 					essential = false;
 				}
 			}
