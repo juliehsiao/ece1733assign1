@@ -32,44 +32,51 @@ void findMinCover (bool **coverTable, int numPIs, int numMinterms, t_blif_cubica
 
         // [2] remove empty rows
         emptyChanged = removeEmptyRow(coverTable, numMinterms, numPIs, validPIs, validMinterms);
-        printf("[removed empty row]\n");
-        printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms);
+        if(emptyChanged) {
+            printf("[removed empty row]\n");
+            printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms);
+        }
 
         // [3] call findEssentialPIs
         ePIChanged = findEssentialPIs (coverTable, numMinterms, validMinterms, f->set_of_cubes, essentialPIs, &EPIIndex, numPIs, validPIs);
+        if(ePIChanged) {
+            printf("[removed essential PIs]\n");
+            printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms);
+        }
         // [4] check if function is covered
         if(isCovered (validMinterms, numMinterms)) {
             done = true;
             break;
         }
-        printf("[removed essential PIs]\n");
-        printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms);
 
         // [5] call row dominance function
         rowDomChanged = removeDominatedRow (coverTable, numPIs, numMinterms, validPIs, validMinterms, f->input_count , f->set_of_cubes);
-        printf("[removed dominated rows]\n");
-        printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms);
-        // [6] try to findEssentialPIs again
-        ePIChanged = ePIChanged || findEssentialPIs (coverTable, numMinterms, validMinterms, f->set_of_cubes, essentialPIs, &EPIIndex, numPIs, validPIs);
-        if(isCovered (validMinterms, numMinterms)) {
-            done = true;
-            break;
+        if(rowDomChanged) {
+            printf("[removed dominated rows]\n");
+            printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms);
+            // [6] try to findEssentialPIs again
+            ePIChanged = ePIChanged || findEssentialPIs (coverTable, numMinterms, validMinterms, f->set_of_cubes, essentialPIs, &EPIIndex, numPIs, validPIs);
+            if(isCovered (validMinterms, numMinterms)) {
+                done = true;
+                break;
+            }
+            printf("[removed essential PIs]\n");
+            printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms);
         }
-        printf("[removed essential PIs]\n");
-        printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms);
-
         // [7] call column dominance function
         colDomChanged = removeDominatedCol(coverTable, numPIs, numMinterms, validPIs, validMinterms);
-        printf("[removed dominated columns]\n");
-        printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms);
-        // [8] try to findEssentialPIs again
-        ePIChanged = ePIChanged || findEssentialPIs (coverTable, numMinterms, validMinterms, f->set_of_cubes, essentialPIs, &EPIIndex, numPIs, validPIs);
-        if(isCovered (validMinterms, numMinterms)) {
-            done = true;
-            break;
+        if(colDomChanged) {
+            printf("[removed dominated columns]\n");
+            printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms);
+            // [8] try to findEssentialPIs again
+            ePIChanged = ePIChanged || findEssentialPIs (coverTable, numMinterms, validMinterms, f->set_of_cubes, essentialPIs, &EPIIndex, numPIs, validPIs);
+            if(isCovered (validMinterms, numMinterms)) {
+                done = true;
+                break;
+            }
+            printf("[removed essential PIs]\n");
+            printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms);
         }
-        printf("[removed essential PIs]\n");
-        printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms);
     }
     if(!done) {
     printf("branch and bound\n");
