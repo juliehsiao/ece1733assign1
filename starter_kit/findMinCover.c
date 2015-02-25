@@ -23,6 +23,8 @@ void findMinCover (bool **coverTable, int numPIs, int numMinterms, t_blif_cubica
     bool colDomChanged  = true;
     bool done           = false;
 
+    printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
+
     while( emptyChanged || ePIChanged || rowDomChanged || colDomChanged )
     {
         emptyChanged   = false;
@@ -84,6 +86,12 @@ void findMinCover (bool **coverTable, int numPIs, int numMinterms, t_blif_cubica
     }
     printf("final cover table\n");
     printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
+
+    freeSetOfCubes(f->set_of_cubes, f->cube_count);
+    f->set_of_cubes = essentialPIs;
+    f->cube_count = EPIIndex;
+    printf("final PIs:\n");
+    printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
 	return;
 }
 
