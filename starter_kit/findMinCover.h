@@ -3,7 +3,8 @@
 #include "cubical_function_representation.h"
 
 
-void findMinCover (bool **coverTable, int numPIs, int numMinterms, t_blif_cubical_function *f);
+void findMinCover (bool **coverTable, int numPIs, int numMinterms, t_blif_cubical_function *f,
+        int *minterms);
 bool removeEmptyRow(bool **coverTable, int numCols, int numRows, bool *validPIs, 
         bool *validMinterms);
 bool findEssentialPIs (bool **coverTable, int numMinterms, bool *validMinterms, 

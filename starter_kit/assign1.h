@@ -26,5 +26,5 @@ void simplify_function(t_blif_cubical_function *f);
 
 void printCoverTable(bool **coverTable, int numRows, int numCols, int *minterms);
 void printValidCoverTable(bool **coverTable, int numRows, int numCols, 
-        bool *validPIs, bool*validMinterms);
+        bool *validPIs, bool*validMinterms, int *minterms);
 

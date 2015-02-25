@@ -135,14 +135,22 @@ void printCoverTable(bool **coverTable, int numRows, int numCols, int *minterms)
 }
 
 void printValidCoverTable(bool **coverTable, int numRows, int numCols, 
-        bool *validPIs, bool*validMinterms)
+        bool *validPIs, bool*validMinterms, int *minterms)
 {
     int i, j;
     printf("**********************************************\n");
+    for(j = 0; j < numCols; j++) {
+        printf("|%2d ", minterms[j]);
+    }
+    printf("|\n");
     for(i = 0; i < numRows; i++) {
         for(j = 0; j < numCols; j++) {
             if(validPIs[i] && validMinterms[j]) {
-                printf("| %c ", (coverTable[i][j])?('v'):(' '));
+                //printf("| %s%c%s ", BGRN, (coverTable[i][j])?(tick):(' '), KEND);
+			    printf("| ");
+			    if (coverTable[i][j]) printf("%s\xE2\x9C\x93%s", BRED, KEND);
+			    else printf(" ");
+			    printf(" ");
             }
             else {
                 printf("|---");
@@ -228,7 +236,7 @@ printf("\n");
     //=====================================================
     // [4] find all minimal covers
     //=====================================================
-    findMinCover(coverTable, f->cube_count, numMinTerms, f);
+    findMinCover(coverTable, f->cube_count, numMinTerms, f, minterms);
 
 
 
