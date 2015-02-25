@@ -113,37 +113,20 @@ int cover_cost(t_blif_cube **cover, int num_cubes, int num_inputs)
 /**********************************************************************/
 /*** helper functions for MINIMIZATION CODE ***************************/
 /**********************************************************************/
-void printCoverTable(bool **coverTable, int numRows, int numCols, int *minterms)
-{
-    int i, j;
-    printf("**********************************************\n");
-    for(j = 0; j < numCols; j++) {
-        printf("|%2d ", minterms[j]);
-    }
-    printf("|\n");
-    for(i = 0; i < numRows; i++) {
-        for(j = 0; j < numCols; j++) {
-            //printf("| %s%c%s ", BGRN, (coverTable[i][j])?(tick):(' '), KEND);
-			printf("| ");
-			if (coverTable[i][j]) printf("%s\xE2\x9C\x93%s", BRED, KEND);
-			else printf(" ");
-			printf(" ");
-        }
-        printf("|\n");
-    }
-    printf("**********************************************\n");
-}
-
 void printValidCoverTable(bool **coverTable, int numRows, int numCols, 
-        bool *validPIs, bool*validMinterms, int *minterms)
+        bool *validPIs, bool*validMinterms, int *minterms, t_blif_cube **set_of_cubes, int numInputs)
 {
     int i, j;
     printf("**********************************************\n");
+	for (j = 0; j < numInputs; j++) {
+		printf("  ");
+	}
     for(j = 0; j < numCols; j++) {
         printf("|%2d ", minterms[j]);
     }
     printf("|\n");
     for(i = 0; i < numRows; i++) {
+		printCube(set_of_cubes[i], numInputs);
         for(j = 0; j < numCols; j++) {
             if(validPIs[i] && validMinterms[j]) {
                 //printf("| %s%c%s ", BGRN, (coverTable[i][j])?(tick):(' '), KEND);
@@ -229,9 +212,7 @@ void simplify_function(t_blif_cubical_function *f)
                 }
             }    
         }
-printf("\n");
     } 
-    printCoverTable(coverTable, f->cube_count, numMinTerms, minterms);
 
     //=====================================================
     // [4] find all minimal covers
