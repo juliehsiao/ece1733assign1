@@ -4,6 +4,9 @@
 // minimization. 
 ////////////////////////////////////////////////////////////////////////
 
+// TODO TODO TODO TODO TODO TODO TODO
+// function not updated?? need to put cover as cubes
+
 /**********************************************************************/
 /*** HEADER FILES *****************************************************/
 /**********************************************************************/
@@ -118,7 +121,6 @@ void printValidCoverTable(bool **coverTable, int numRows, int numCols,
 {
     int i, j;
     printf("**********************************************\n");
-    printf("     ");
 	for (j = 0; j < numInputs; j++) {
 		printf("  ");
 	}
@@ -126,8 +128,21 @@ void printValidCoverTable(bool **coverTable, int numRows, int numCols,
         printf("|%2d ", minterms[j]);
     }
     printf("|\n");
+
     for(i = 0; i < numRows; i++) {
-        printf("[%2d] ", i);
+
+		for (j = 0; j < numInputs; j++) {
+			printf("  ");
+		}
+        for(j = 0; j < numCols; j++) {
+			if (!validMinterms[j]) {
+				printf("|-%s|%s-", KCYN, KEND);
+			} else {
+				printf("|---");
+			}
+		}
+		printf("|\n");
+
 		printCube(set_of_cubes[i], numInputs);
         for(j = 0; j < numCols; j++) {
             if(validPIs[i] && validMinterms[j]) {
@@ -137,9 +152,14 @@ void printValidCoverTable(bool **coverTable, int numRows, int numCols,
 			    else printf(" ");
 			    printf(" ");
             }
-            else {
-                printf("|---");
+            else if (validPIs[i] && !validMinterms[j]) {
+                printf("|%s | %s", KCYN, KEND);
             }
+			else if (!validPIs[i] && validMinterms[j]) {
+                printf("|%s---%s", KCYN, KEND);
+			} else {
+                printf("|%s-+-%s", KCYN, KEND);
+			}
         }
         printf("|\n");
     }
@@ -192,6 +212,30 @@ void simplify_function(t_blif_cubical_function *f)
         }
     }
     numMinterms = mintermIndex;
+
+	// Remove repeated minterms
+	int *noRepeatMinterms = (int *) malloc ((numMinterms + 1) * sizeof(int));
+	int noRepeatMintermIndex = 0;
+	for (i = 0; i < numMinterms; i++) {
+		bool repeated = false;
+		for (j = 0; j < i; j++) {
+			if (minterms[i] == minterms[j]) {
+				repeated = true;
+				break;
+			}
+		}
+		if (!repeated) {
+			noRepeatMinterms[noRepeatMintermIndex++] = minterms[i];
+		}
+	}
+
+	// Copy over from the no repeat minterm list to minterms
+	memcpy (minterms, noRepeatMinterms, (numMinterms + 1) * sizeof(int));
+	numMinterms = noRepeatMintermIndex;
+
+	free(noRepeatMinterms);
+
+	printf("%sFound %d minterms%s\n", BMAG, numMinterms, KEND);
 
     //=====================================================
     // [2] merge cubes to set of PIs
