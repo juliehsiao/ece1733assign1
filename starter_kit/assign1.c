@@ -158,7 +158,7 @@ void simplify_function(t_blif_cubical_function *f)
     //=====================================================
     // [1] store the minterms for use later
     //=====================================================
-    int numMinTerms = 0;
+    int numMinterms = 0;
     int i, j, k;
     for(i = 0; i < f->cube_count; i++)
     {
@@ -170,20 +170,20 @@ void simplify_function(t_blif_cubical_function *f)
                     numX++;
                 }
             }
-            numMinTerms+= (1 << numX);
+            numMinterms+= (1 << numX);
         }
     }
 
-    int * minterms = (int *) malloc((numMinTerms + 1) * sizeof(int));
-    int minTermIndex = 0;
+    int * minterms = (int *) malloc((numMinterms + 1) * sizeof(int));
+    int mintermIndex = 0;
     printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
 
     for(i = 0; i < f->cube_count; i++) {
         if (!f->set_of_cubes[i]->is_DC) {
-            minTermIndex = enumerateAllMinterms(f->set_of_cubes[i], minterms, minTermIndex, f->input_count); 
+            mintermIndex = enumerateAllMinterms(f->set_of_cubes[i], minterms, mintermIndex, f->input_count); 
         }
     }
-    numMinTerms = minTermIndex;
+    numMinterms = mintermIndex;
 
     //=====================================================
     // [2] merge cubes to set of PIs
@@ -198,15 +198,15 @@ void simplify_function(t_blif_cubical_function *f)
     //=====================================================
     bool **coverTable = (bool **) malloc( f->cube_count * sizeof(bool *) );
     for(i = 0; i < f->cube_count; i++) {
-        coverTable[i] = (bool *) malloc( numMinTerms * sizeof(bool) );
-        memset(coverTable[i], false, numMinTerms);
+        coverTable[i] = (bool *) malloc( numMinterms * sizeof(bool) );
+        memset(coverTable[i], false, numMinterms);
     }
 
     for(i = 0; i < f->cube_count; i++) {
         int PICovers[64] = {0};
         int numCovered = enumerateAllMinterms(f->set_of_cubes[i], PICovers, 0, f->input_count);
         for(j = 0; j < numCovered; j++) {
-            for(k = 0; k < numMinTerms; k++) {
+            for(k = 0; k < numMinterms; k++) {
                 if(minterms[k] == PICovers[j]) {
                     coverTable[i][k] = true;
                 }
@@ -217,8 +217,52 @@ void simplify_function(t_blif_cubical_function *f)
     //=====================================================
     // [4] find all minimal covers
     //=====================================================
-    findMinCover(coverTable, f->cube_count, numMinTerms, f, minterms);
+    // [1] setup validMinterms, validPIs
+    bool * validPIs = (bool *) malloc(f->cube_count * sizeof(bool));
+    memset(validPIs, true, f->cube_count);
+    bool * validMinterms = (bool *) malloc(numMinterms * sizeof(bool));
+    memset(validMinterms, true, numMinterms);
+	t_blif_cube **essentialPIs = (t_blif_cube **) malloc ((f->cube_count) * sizeof(t_blif_cube *));
+    int EPIIndex = 0;
 
+    bool done = findMinCover(coverTable, f->cube_count, numMinterms, f, minterms, validPIs, validMinterms, essentialPIs, &EPIIndex);
+    
+    if(done) {
+        freeSetOfCubes(f->set_of_cubes, f->cube_count);
+        f->set_of_cubes = essentialPIs;
+        f->cube_count = EPIIndex;
+        printf("final PIs:\n");
+        printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
+    }
+    else {
+        //generate new numValidPIs
+        int numPIs = f->cube_count;
+        int numValidPIs = 0;
+		for (k = 0; k < numPIs; k++) {
+			if (validPIs[k] == true) {
+				numValidPIs++;
+			}
+		}
+
+        // find all solutions
+        //max number of solutions = numValidPIs * numValidPIs
+        t_blif_cube ***set_of_cubes_list = (t_blif_cube ***) malloc (pow(2, numValidPIs) * sizeof(t_blif_cube **));
+        int *EPIIndexList = (int *) malloc (pow(2, numValidPIs) * sizeof(int));
+        memset(EPIIndexList, 0, pow(2, numValidPIs)*sizeof(int));
+        int *costList = (int *) malloc (pow(2, numValidPIs) * sizeof(int));
+        memset(costList, 0, pow(2, numValidPIs)*sizeof(int));
+        int solutionIdx = 0;
+
+        branchAndBound(set_of_cubes_list, EPIIndexList, &solutionIdx, essentialPIs, EPIIndex, costList, 
+            f->cube_count, numMinterms, minterms, numValidPIs, validPIs, validMinterms, f, coverTable);
+
+        //keep the ones with the mininal cost
+        printf("branch and bound generated %d solutions\n", solutionIdx);
+        for(k=0; k < solutionIdx; k++) {
+            printf("solution %d:\n", k);
+            printSetOfCubes(set_of_cubes_list[k], f->input_count, EPIIndexList[k]);
+        }
+    }
 
 
 
