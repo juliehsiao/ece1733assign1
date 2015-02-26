@@ -191,6 +191,30 @@ void simplify_function(t_blif_cubical_function *f)
     }
     numMinTerms = minTermIndex;
 
+	// Remove repeated minterms
+	int *noRepeatMinterms = (int *) malloc ((numMinTerms + 1) * sizeof(int));
+	int noRepeatMinTermIndex = 0;
+	for (i = 0; i < numMinTerms; i++) {
+		bool repeated = false;
+		for (j = 0; j < i; j++) {
+			if (minterms[i] == minterms[j]) {
+				repeated = true;
+				break;
+			}
+		}
+		if (!repeated) {
+			noRepeatMinterms[noRepeatMinTermIndex++] = minterms[i];
+		}
+	}
+
+	// Copy over from the no repeat minterm list to minterms
+	memcpy (minterms, noRepeatMinterms, (numMinTerms + 1) * sizeof(int));
+	numMinTerms = noRepeatMinTermIndex;
+
+	free(noRepeatMinterms);
+
+	printf("%sFound %d minterms%s\n", BMAG, numMinTerms, KEND);
+
     //=====================================================
     // [2] merge cubes to set of PIs
     //=====================================================
