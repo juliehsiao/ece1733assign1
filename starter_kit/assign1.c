@@ -120,50 +120,65 @@ void printValidCoverTable(bool **coverTable, int numRows, int numCols,
         bool *validPIs, bool*validMinterms, int *minterms, t_blif_cube **set_of_cubes, int numInputs)
 {
     int i, j;
-    printf("**********************************************\n");
+
+	// print a border
+    for (j = 0; j <= (numInputs*2 + numCols*6); j++) {
+        printf("*");
+    }
+    printf("\n");
+
+    // Print the minterms line
 	for (j = 0; j < numInputs; j++) {
 		printf("  ");
 	}
     for(j = 0; j < numCols; j++) {
-        printf("|%2d ", minterms[j]);
+        printf("|%4d ", minterms[j]);
     }
     printf("|\n");
 
+    // Print the rows of the cover table
     for(i = 0; i < numRows; i++) {
 
+        // Print a border between rows
 		for (j = 0; j < numInputs; j++) {
 			printf("  ");
 		}
+
         for(j = 0; j < numCols; j++) {
-			if (!validMinterms[j]) {
-				printf("|-%s|%s-", KCYN, KEND);
+			if (!validMinterms[j] && i > 0) {
+				printf("|--%s|%s--", KCYN, KEND);
 			} else {
-				printf("|---");
+				printf("|-----");
 			}
 		}
 		printf("|\n");
 
+        // Print the actual row
 		printCube(set_of_cubes[i], numInputs);
         for(j = 0; j < numCols; j++) {
             if(validPIs[i] && validMinterms[j]) {
-                //printf("| %s%c%s ", BGRN, (coverTable[i][j])?(tick):(' '), KEND);
-			    printf("| ");
+			    printf("|  ");
 			    if (coverTable[i][j]) printf("%s\xE2\x9C\x93%s", BRED, KEND);
 			    else printf(" ");
-			    printf(" ");
+			    printf("  ");
             }
             else if (validPIs[i] && !validMinterms[j]) {
-                printf("|%s | %s", KCYN, KEND);
+                printf("|%s  |  %s", KCYN, KEND);
             }
 			else if (!validPIs[i] && validMinterms[j]) {
-                printf("|%s---%s", KCYN, KEND);
+                printf("|%s-----%s", KCYN, KEND);
 			} else {
-                printf("|%s-+-%s", KCYN, KEND);
+                printf("|%s--+--%s", KCYN, KEND);
 			}
         }
         printf("|\n");
     }
-    printf("**********************************************\n");
+
+	// print a border
+    for (j = 0; j <= (numInputs*2 + numCols*6); j++) {
+        printf("*");
+    }
+    printf("\n");
 }
 
 /**********************************************************************/
