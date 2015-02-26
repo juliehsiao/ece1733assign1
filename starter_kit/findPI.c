@@ -2,6 +2,7 @@
 #include <string.h>
 #include <assert.h>
 #include "findPI.h"
+#include "assign1.h"
 
 
 // Orders the set_of_cubes by cardinality of 1's
@@ -9,19 +10,22 @@
 //   and assigns the address of f->set_of_cubes to ordered[i] (doesn't allocate t_blif_cube)
 void orderSetOfCubes (t_blif_cubical_function *f, t_blif_cube **ordered)
 {
-    t_blif_cube **orig = f->set_of_cubes;
     int index = 0;
-    assert(orig);
+    assert(f->set_of_cubes);
     int i;
     for (i = 0; i <= f->input_count; i++) {
         int j;
         for (j = 0; j < f->cube_count; j++) {
-            if (findCardinality(f->set_of_cubes[j], f->input_count) == i) {
+        	int cardinality = findCardinality(f->set_of_cubes[j], f->input_count);
+			if (cardinality == i) {
                 ordered[index++] = f->set_of_cubes[j];
             }
         }
     }
-    assert(index == f->cube_count);
+	if (index != f->cube_count) {
+		printf("%sIn orderSetOfCubes: f->cube_count (%d) != index (%d)%s\n", BRED, f->cube_count, index, KEND);
+	    assert(0);
+	}
 }
 
 // Returns cardinality of a cube cube, size is the number of inputs for the function
@@ -38,16 +42,21 @@ int findCardinality (t_blif_cube *cube, int size)
 // Takes a set of cubes and returns a set of PIs
 void findPI(t_blif_cubical_function *f, t_blif_cube **PIs)
 {
-    t_blif_cube ** tmpPIs;
-    t_blif_cube ** orderedSetOfCubes = (t_blif_cube **) malloc (f->cube_count * sizeof(t_blif_cube *));
-    orderSetOfCubes(f, orderedSetOfCubes); // orderedSetOfCubes[i] now points to original t_blif_cube structs from f->set_of_cubes
+    t_blif_cube ** tmpPIs, ** orderedSetOfCubes;
+
     bool mergedCubes = true;
     int PIIndex = 0;
+	
     // Loop to find the PIs
     while (mergedCubes) {
-        printSetOfCubes(orderedSetOfCubes, f->input_count, f->cube_count);
-
         mergedCubes = false;
+
+    	orderedSetOfCubes = (t_blif_cube **) malloc (f->cube_count * sizeof(t_blif_cube *));
+
+		// Order the set of cubes based on cardinality of 1's
+    	orderSetOfCubes(f, orderedSetOfCubes); // orderedSetOfCubes[i] now points to original t_blif_cube structs from f->set_of_cubes
+
+        printSetOfCubes(orderedSetOfCubes, f->input_count, f->cube_count);
 
         bool *used = (bool *) malloc (f->cube_count * sizeof(bool));
         memset(used, false, f->cube_count * sizeof(bool));
@@ -69,21 +78,34 @@ void findPI(t_blif_cubical_function *f, t_blif_cube **PIs)
                     tmpPIs[newCubeCount++] = mergedImplicant;
                     mergedCubes = true;
                 }
+            }
+        }
 
-            }
-        }
-        for(i = 0; i < f->cube_count; i++) { //for every cube
-            if ((used[i] == false) &&  // if it wasn't used for merge and it is not already in the list
-                    !isRedundantPI(PIs, f->input_count, PIIndex, orderedSetOfCubes[i])) {
-                //allocate t_blif_cube and add it in the list
-                PIs[PIIndex] = (t_blif_cube *) malloc(sizeof(t_blif_cube));
-                PIs[PIIndex++][0] = orderedSetOfCubes[i][0]; 
-            }
-        }
+		// unused cubes should be added to the tmpPIs list to be reused for combine
+		if (!mergedCubes) {
+	        for(i = 0; i < f->cube_count; i++) { //for every cube
+    	        if ((used[i] == false) &&  // if it wasn't used for merge and it is not already in the list
+        	            !isRedundantPI(PIs, f->input_count, PIIndex, orderedSetOfCubes[i])) {
+            	    //allocate t_blif_cube and add it in the list
+                	PIs[PIIndex] = (t_blif_cube *) malloc(sizeof(t_blif_cube));
+                	PIs[PIIndex++][0] = orderedSetOfCubes[i][0]; 
+            	}
+        	}
+		} else {
+	        for(i = 0; i < f->cube_count; i++) { //for every cube
+    	        if ((used[i] == false) &&  // if it wasn't used for merge and it is not already in the list
+        	            !isRedundantPI(PIs, f->input_count, PIIndex, orderedSetOfCubes[i])) {
+            	    //allocate t_blif_cube and add it in the list
+                	tmpPIs[newCubeCount] = (t_blif_cube *) malloc(sizeof(t_blif_cube));
+                	tmpPIs[newCubeCount++][0] = orderedSetOfCubes[i][0]; 
+            	}
+        	}
+		}
         
         if (newCubeCount != 0) { //if there is some merging happening in this iteration
             freeSetOfCubes(orderedSetOfCubes, f->cube_count); //free the old list
             orderedSetOfCubes = tmpPIs; //make the old list point to the new list
+			f->set_of_cubes = tmpPIs;
             f->cube_count = newCubeCount; // update cube count
         }
 

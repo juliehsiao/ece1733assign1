@@ -128,6 +128,7 @@ t_blif_cube *           mergeImplicants(t_blif_cube *c1, t_blif_cube *c2, int si
 void                    freeSetOfCubes (t_blif_cube **cubes, int cube_count);
 void                    printCube(t_blif_cube *cube, int numInputs);
 void                    printSetOfCubes(t_blif_cube **cubes, int numInputs, int numCubes);
+bool isRedundantSetOfCubes(t_blif_cube **PIs1, int inputCount, int listSize1, t_blif_cube **PIs2, int listSize2 );
 bool isRedundantPI(t_blif_cube **PIs, int inputCount, int listSize, t_blif_cube *newPI);
 int                     enumerateAllMinterms(t_blif_cube * cube, int *mintermArray, int startIndex, int input_count);
 

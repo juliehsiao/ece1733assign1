@@ -118,6 +118,7 @@ void printValidCoverTable(bool **coverTable, int numRows, int numCols,
 {
     int i, j;
     printf("**********************************************\n");
+    printf("     ");
 	for (j = 0; j < numInputs; j++) {
 		printf("  ");
 	}
@@ -126,6 +127,7 @@ void printValidCoverTable(bool **coverTable, int numRows, int numCols,
     }
     printf("|\n");
     for(i = 0; i < numRows; i++) {
+        printf("[%2d] ", i);
 		printCube(set_of_cubes[i], numInputs);
         for(j = 0; j < numCols; j++) {
             if(validPIs[i] && validMinterms[j]) {
@@ -155,6 +157,12 @@ void simplify_function(t_blif_cubical_function *f)
  * The number of cubes is stored in the field cube_count.
  */
 {
+	
+	if (f->set_of_cubes == NULL) {
+		printf("%sWarning: No cubes in function! Skipping...\n%s", BYEL, KEND);
+		return;
+	}
+
     //=====================================================
     // [1] store the minterms for use later
     //=====================================================
@@ -256,11 +264,62 @@ void simplify_function(t_blif_cubical_function *f)
         branchAndBound(set_of_cubes_list, EPIIndexList, &solutionIdx, essentialPIs, EPIIndex, costList, 
             f->cube_count, numMinterms, minterms, numValidPIs, validPIs, validMinterms, f, coverTable);
 
-        //keep the ones with the mininal cost
         printf("branch and bound generated %d solutions\n", solutionIdx);
+        //for(k=0; k < solutionIdx; k++) {
+        //    printf("solution %d:\n", k);
+        //    printSetOfCubes(set_of_cubes_list[k], f->input_count, EPIIndexList[k]);
+        //}
+
+        //find minimal cost
+        int minCost = costList[0];
         for(k=0; k < solutionIdx; k++) {
+            if(costList[k] < minCost) minCost = costList[k];
+        }
+        printf("minimal cost is: %d\n", minCost);
+
+        //keep the ones with the mininal cost
+        int minSolnIdx[64] = {0};
+        int numMinSolns = 0;
+        for(k=0; k < solutionIdx; k++) {
+            if(costList[k] == minCost) {
+                minSolnIdx[numMinSolns++] = k;
+            }
+            else {
+                freeSetOfCubes(set_of_cubes_list[k], EPIIndexList[k]);
+            }
+        }
+        printf("there are %d solutions with minimal cost (can be redundant\n", numMinSolns);
+
+        // remove redundant solutions
+        int finalSolnIdx[64] = {0};
+        int numFinalSolns = 0;
+        for(i=0; i < numMinSolns-1; i++) {
+            int idx = minSolnIdx[i];
+            bool isRedundant = false;
+            for(j=i+1; j < numMinSolns; j++) {
+                int idx2 = minSolnIdx[j];
+                // keep solution only if it doesn't overlap with a later solution
+                if(isRedundantSetOfCubes(set_of_cubes_list[idx], f->input_count, EPIIndexList[idx], 
+                                          set_of_cubes_list[idx2], EPIIndexList[idx2])) {
+                    isRedundant = true;
+                }
+            }
+            if(!isRedundant)
+                finalSolnIdx[numFinalSolns++] = idx;
+        }
+
+        freeSetOfCubes(f->set_of_cubes, f->cube_count);
+        printf("branch and bound found %d minimal solutions\n", numFinalSolns);
+        for(k=0; k < numFinalSolns; k++) {
+            int idx = finalSolnIdx[k];
+            printf("************************************************\n");
             printf("solution %d:\n", k);
-            printSetOfCubes(set_of_cubes_list[k], f->input_count, EPIIndexList[k]);
+            printSetOfCubes(set_of_cubes_list[idx], f->input_count, EPIIndexList[idx]);
+            f->set_of_cubes = set_of_cubes_list[idx];
+            f->cube_count = EPIIndexList[idx];
+			printf("#inputs = %i; #cubes = %i; cost = %i\n", f->input_count, f->cube_count, function_cost(f)); 
+            printf("************************************************\n");
+            freeSetOfCubes(f->set_of_cubes, f->cube_count);
         }
     }
 

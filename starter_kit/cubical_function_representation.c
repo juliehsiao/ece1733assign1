@@ -107,6 +107,26 @@ void free_cubical_function(t_blif_cubical_function *f)
 	}
 }
 
+// takes two lists of PIs and return whether the lists are the same
+bool isRedundantSetOfCubes(t_blif_cube **PIs1, int inputCount, int listSize1, t_blif_cube **PIs2, int listSize2 )
+{
+    int i, j;
+    if(listSize1 != listSize2) return false;
+
+    int sameCount = 0;
+    for(i = 0; i < listSize1; i++)
+    {
+        for(j = 0; j < listSize2; j++) {
+            if(isRedundantPI(&(PIs1[i]), inputCount, 1, PIs2[j])) {
+                sameCount++;
+            }
+        }
+    }
+
+    if(sameCount != listSize1) return false;
+    else return true;
+}
+
 // takes a list of PI and a newPI, and return whether the newPI exists in the list already
 bool isRedundantPI(t_blif_cube **PIs, int inputCount, int listSize, t_blif_cube *newPI)
 {

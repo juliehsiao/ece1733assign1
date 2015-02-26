@@ -14,10 +14,13 @@
 void branchAndBound(t_blif_cube ***set_of_cubes_list, int *EPIIndexList, int *solutionIdx, t_blif_cube **prevEPIs, int prevEPICount, int *costList,
         int numPIs, int numMinterms, int *minterms, int numValidPIs, bool *validPIs, bool *validMinterms, t_blif_cubical_function *f, bool **coverTable)
 {
+//printf("begin branch and bound... trying 2^%d combos\n", numValidPIs);
+//int z; scanf("%d", &z);
     int i, j, k;
     t_blif_cube **PIs = f->set_of_cubes;
 
     for(i = 0; i < numValidPIs; i++) { //try to take one PI & compute cost
+    printf("iteration %d\n", i);
         int count = 0;
         for(j = 0; j < numPIs; j++) {
             if(!validPIs[j]) continue;
@@ -35,6 +38,7 @@ void branchAndBound(t_blif_cube ***set_of_cubes_list, int *EPIIndexList, int *so
         int newEPICount = prevEPICount;
 
 		// add essential PI to list
+        printf("%staking PI[%d]%s\n", BRED, j, KEND);
 		newEssentialPIs[newEPICount] = (t_blif_cube *) malloc (sizeof(t_blif_cube));
 		newEssentialPIs[newEPICount++][0] = PIs[j][0];
 		// invalidate the PI and all minterm covered by the EPI to reduce the table
@@ -64,7 +68,8 @@ void branchAndBound(t_blif_cube ***set_of_cubes_list, int *EPIIndexList, int *so
             // store the number of cubes associated with this solution
             EPIIndexList[(*solutionIdx)++] = newEPICount;
 
-            scanf("press Enter...");
+//            printf("press Enter...");
+//int z; scanf("%d", &z);
         }
         else
         {
@@ -76,9 +81,10 @@ void branchAndBound(t_blif_cube ***set_of_cubes_list, int *EPIIndexList, int *so
 		    	}
 		    }
 
-            scanf("press Enter...");
+//            printf("press Enter...");
+//int z; scanf("%d", &z);
             branchAndBound(set_of_cubes_list, EPIIndexList, solutionIdx, newEssentialPIs, newEPICount, costList, 
-                numPIs, numMinterms, minterms, newNumValidPIs, validPIs, validMinterms, f, coverTable);
+                numPIs, numMinterms, minterms, newNumValidPIs, newValidPIs, newValidMinterms, f, coverTable);
         }
     }
     return;
@@ -210,7 +216,7 @@ bool findEssentialPIs (bool **coverTable, int numMinterms, bool *validMinterms, 
 			essential = true;
 			for (k = 0; k < numPIs; k++) {
 				if (i == k) continue;
-				if (coverTable[k][j] && validMinterms[k] == true) {
+				if (coverTable[k][j] && validMinterms[j] == true && validPIs[k] == true) {
 					essential = false;
 				}
 			}
@@ -224,6 +230,7 @@ bool findEssentialPIs (bool **coverTable, int numMinterms, bool *validMinterms, 
 
 			// invalidate the PI and all minterm covered by the EPI to reduce the table
 			newValidPIs[i] = false;
+        printf("removing PI[%d]...\n", i);
 
 			for (k = 0; k < numMinterms; k++) {
 				if (coverTable[i][k] == true) {
