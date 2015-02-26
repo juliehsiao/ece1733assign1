@@ -135,13 +135,13 @@ bool findEssentialPIs (bool **coverTable, int numMinterms, bool *validMinterms, 
 	// Iterate through each PI, it is essential if it covers a minterm that is not covered by any other PI
 	for (i = 0; i < numPIs; i++) {
 		if (validPIs[i] == false) continue;
-		bool essential;
+		bool essential = false;
 		for (j = 0; j < numMinterms; j++) {
 			if (validMinterms[j] == false || coverTable[i][j] == false) continue;
 			essential = true;
 			for (k = 0; k < numPIs; k++) {
 				if (i == k) continue;
-				if (coverTable[k][j] && validMinterms[k] == true) {
+				if (coverTable[k][j] && validMinterms[j] && validPIs[k] == true) {
 					essential = false;
 				}
 			}
