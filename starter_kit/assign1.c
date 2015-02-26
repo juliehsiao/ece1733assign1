@@ -4,6 +4,9 @@
 // minimization. 
 ////////////////////////////////////////////////////////////////////////
 
+// TODO TODO TODO TODO TODO TODO TODO
+// function not updated?? need to put cover as cubes
+
 /**********************************************************************/
 /*** HEADER FILES *****************************************************/
 /**********************************************************************/
@@ -125,7 +128,21 @@ void printValidCoverTable(bool **coverTable, int numRows, int numCols,
         printf("|%2d ", minterms[j]);
     }
     printf("|\n");
+
     for(i = 0; i < numRows; i++) {
+
+		for (j = 0; j < numInputs; j++) {
+			printf("  ");
+		}
+        for(j = 0; j < numCols; j++) {
+			if (!validMinterms[j]) {
+				printf("|-%s|%s-", KCYN, KEND);
+			} else {
+				printf("|---");
+			}
+		}
+		printf("|\n");
+
 		printCube(set_of_cubes[i], numInputs);
         for(j = 0; j < numCols; j++) {
             if(validPIs[i] && validMinterms[j]) {
@@ -135,9 +152,14 @@ void printValidCoverTable(bool **coverTable, int numRows, int numCols,
 			    else printf(" ");
 			    printf(" ");
             }
-            else {
-                printf("|---");
+            else if (validPIs[i] && !validMinterms[j]) {
+                printf("|%s | %s", KCYN, KEND);
             }
+			else if (!validPIs[i] && validMinterms[j]) {
+                printf("|%s---%s", KCYN, KEND);
+			} else {
+                printf("|%s-+-%s", KCYN, KEND);
+			}
         }
         printf("|\n");
     }
