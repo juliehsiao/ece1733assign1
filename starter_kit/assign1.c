@@ -337,7 +337,7 @@ void simplify_function(t_blif_cubical_function *f)
         // remove redundant solutions
         int finalSolnIdx[64] = {0};
         int numFinalSolns = 0;
-        for(i=0; i < numMinSolns-1; i++) {
+        for(i=0; i < numMinSolns; i++) {
             int idx = minSolnIdx[i];
             bool isRedundant = false;
             for(j=i+1; j < numMinSolns; j++) {
@@ -348,8 +348,9 @@ void simplify_function(t_blif_cubical_function *f)
                     isRedundant = true;
                 }
             }
-            if(!isRedundant)
+            if(!isRedundant) {
                 finalSolnIdx[numFinalSolns++] = idx;
+            }
         }
 
         freeSetOfCubes(f->set_of_cubes, f->cube_count);
