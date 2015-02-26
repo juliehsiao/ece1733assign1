@@ -47,6 +47,10 @@ void findPI(t_blif_cubical_function *f, t_blif_cube **PIs)
     bool mergedCubes = true;
     int PIIndex = 0;
 	
+	printf("All Implicants\n");
+    printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
+	printf("\n");
+
     // Loop to find the PIs
     while (mergedCubes) {
         mergedCubes = false;
@@ -56,7 +60,7 @@ void findPI(t_blif_cubical_function *f, t_blif_cube **PIs)
 		// Order the set of cubes based on cardinality of 1's
     	orderSetOfCubes(f, orderedSetOfCubes); // orderedSetOfCubes[i] now points to original t_blif_cube structs from f->set_of_cubes
 
-        printSetOfCubes(orderedSetOfCubes, f->input_count, f->cube_count);
+        if (debug) printSetOfCubes(orderedSetOfCubes, f->input_count, f->cube_count);
 
         bool *used = (bool *) malloc (f->cube_count * sizeof(bool));
         memset(used, false, f->cube_count * sizeof(bool));
@@ -111,6 +115,10 @@ void findPI(t_blif_cubical_function *f, t_blif_cube **PIs)
 
         free(used);
     }
+
+	printf("All Prime Implicants\n");
+    printSetOfCubes(orderedSetOfCubes, f->input_count, f->cube_count);
+	printf("\n");
 
     //update the final cube count
     f->cube_count = PIIndex;

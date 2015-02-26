@@ -2,10 +2,8 @@
 // Solution to assignment #1 for ECE1733.
 // This program implements the Quine-McCluskey method for 2-level
 // minimization. 
+// Authors: Julie Hsiao & Joy Chen
 ////////////////////////////////////////////////////////////////////////
-
-// TODO TODO TODO TODO TODO TODO TODO
-// function not updated?? need to put cover as cubes
 
 /**********************************************************************/
 /*** HEADER FILES *****************************************************/
@@ -219,7 +217,6 @@ void simplify_function(t_blif_cubical_function *f)
 
     int * minterms = (int *) malloc((numMinterms + 1) * sizeof(int));
     int mintermIndex = 0;
-    printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
 
     for(i = 0; i < f->cube_count; i++) {
         if (!f->set_of_cubes[i]->is_DC) {
@@ -250,15 +247,12 @@ void simplify_function(t_blif_cubical_function *f)
 
 	free(noRepeatMinterms);
 
-	printf("%sFound %d minterms%s\n", BMAG, numMinterms, KEND);
-
     //=====================================================
     // [2] merge cubes to set of PIs
     //=====================================================
     t_blif_cube ** PIs = (t_blif_cube **) malloc (f->cube_count * sizeof(t_blif_cube *));
     findPI(f, PIs); //f->set_of_cubes will be freed in findPI, PIs is the only valid list
     f->set_of_cubes = PIs;
-    printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
 
     //=====================================================
     // [3] construct the cover table
@@ -298,7 +292,7 @@ void simplify_function(t_blif_cubical_function *f)
         freeSetOfCubes(f->set_of_cubes, f->cube_count);
         f->set_of_cubes = essentialPIs;
         f->cube_count = EPIIndex;
-        printf("final PIs:\n");
+        printf("%sFinal PIs:%s\n", BGRN, KEND);
         printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
     }
     else {
@@ -347,7 +341,7 @@ void simplify_function(t_blif_cubical_function *f)
                 freeSetOfCubes(set_of_cubes_list[k], EPIIndexList[k]);
             }
         }
-        printf("there are %d solutions with minimal cost (can be redundant\n", numMinSolns);
+        printf("there are %d solutions with minimal cost (can be redundant)\n", numMinSolns);
 
         // remove redundant solutions
         int finalSolnIdx[64] = {0};
@@ -379,12 +373,12 @@ void simplify_function(t_blif_cubical_function *f)
             f->cube_count = EPIIndexList[idx];
 			printf("#inputs = %i; #cubes = %i; cost = %i\n", f->input_count, f->cube_count, function_cost(f)); 
             printf("************************************************\n");
-            freeSetOfCubes(f->set_of_cubes, f->cube_count);
+
+			if (k != numFinalSolns - 1) {
+            	freeSetOfCubes(f->set_of_cubes, f->cube_count);
+			}
         }
     }
-
-
-
 }
 
 
@@ -395,6 +389,7 @@ void simplify_function(t_blif_cubical_function *f)
 
 int main(int argc, char* argv[])
 {
+	debug = false;
 	t_blif_logic_circuit *circuit = NULL;
 
 	if (argc != 2)

@@ -200,14 +200,22 @@ void printCube(t_blif_cube *cube, int numInputs)
 void printSetOfCubes(t_blif_cube **cubes, int numInputs, int numCubes)
 {
     int i, j;
-    printf("=====================\n");
+	// Print a border
+	for (i = 0; i < numInputs; i++) {
+		printf("==");
+	}
+	printf("\n");
     for(i = 0; i < numCubes; i++) {
         for(j = 0; j < numInputs; j++) {
             printf("%c ", translateLiterals(read_cube_variable(cubes[i]->signal_status, j)));
         }
         printf("\n");
     }
-    printf("=====================\n");
+	// Print a border
+	for (i = 0; i < numInputs; i++) {
+		printf("==");
+	}
+	printf("\n");
 }
 
 // given a cube, returns all cubes represented by that cube in an int array
