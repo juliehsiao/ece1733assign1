@@ -294,6 +294,7 @@ void simplify_function(t_blif_cubical_function *f)
         f->cube_count = EPIIndex;
         printf("%sFinal PIs:%s\n", BGRN, KEND);
         printSetOfCubes(f->set_of_cubes, f->input_count, f->cube_count);
+        printf("\n");
     }
     else {
         //generate new numValidPIs
@@ -317,7 +318,7 @@ void simplify_function(t_blif_cubical_function *f)
         branchAndBound(set_of_cubes_list, EPIIndexList, &solutionIdx, essentialPIs, EPIIndex, costList, 
             f->cube_count, numMinterms, minterms, numValidPIs, validPIs, validMinterms, f, coverTable);
 
-        printf("branch and bound generated %d solutions\n", solutionIdx);
+        printf("Branch and bound generated %d solutions\n", solutionIdx);
         //for(k=0; k < solutionIdx; k++) {
         //    printf("solution %d:\n", k);
         //    printSetOfCubes(set_of_cubes_list[k], f->input_count, EPIIndexList[k]);
@@ -328,7 +329,7 @@ void simplify_function(t_blif_cubical_function *f)
         for(k=0; k < solutionIdx; k++) {
             if(costList[k] < minCost) minCost = costList[k];
         }
-        printf("minimal cost is: %d\n", minCost);
+        printf("Minimal cost is: %d\n", minCost);
 
         //keep the ones with the mininal cost
         int minSolnIdx[64] = {0};
@@ -341,7 +342,7 @@ void simplify_function(t_blif_cubical_function *f)
                 freeSetOfCubes(set_of_cubes_list[k], EPIIndexList[k]);
             }
         }
-        printf("there are %d solutions with minimal cost (can be redundant)\n", numMinSolns);
+        printf("There are %d solutions with minimal cost (can be redundant)\n", numMinSolns);
 
         // remove redundant solutions
         int finalSolnIdx[64] = {0};
@@ -363,16 +364,14 @@ void simplify_function(t_blif_cubical_function *f)
         }
 
         freeSetOfCubes(f->set_of_cubes, f->cube_count);
-        printf("branch and bound found %d minimal solutions\n", numFinalSolns);
+        printf("Branch and bound found %d minimal solutions\n", numFinalSolns);
         for(k=0; k < numFinalSolns; k++) {
             int idx = finalSolnIdx[k];
-            printf("************************************************\n");
-            printf("solution %d:\n", k);
+            printf("Solution %d:\n", k);
             printSetOfCubes(set_of_cubes_list[idx], f->input_count, EPIIndexList[idx]);
             f->set_of_cubes = set_of_cubes_list[idx];
             f->cube_count = EPIIndexList[idx];
-			printf("#inputs = %i; #cubes = %i; cost = %i\n", f->input_count, f->cube_count, function_cost(f)); 
-            printf("************************************************\n");
+			printf("#inputs = %i; #cubes = %i; cost = %i\n\n", f->input_count, f->cube_count, function_cost(f)); 
 
 			if (k != numFinalSolns - 1) {
             	freeSetOfCubes(f->set_of_cubes, f->cube_count);
@@ -408,7 +407,7 @@ int main(int argc, char* argv[])
 		int index;
 
 		/* Minimize each function, one at a time. */
-		printf("Minimizing logic functions\n");
+		printf("Minimizing logic functions\n\n");
 		for (index = 0; index < circuit->function_count; index++)
 		{
 			t_blif_cubical_function *function = circuit->list_of_functions[index];
@@ -417,7 +416,7 @@ int main(int argc, char* argv[])
 		}
 
 		/* Print out synthesis report. */
-		printf("Report:\r\n");
+		printf("%sReport:%s\r\n", BGRN, KEND);
 		for (index = 0; index < circuit->function_count; index++)
 		{
 			t_blif_cubical_function *function = circuit->list_of_functions[index];
