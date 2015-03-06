@@ -5,8 +5,7 @@
 #include "cubical_function_representation.h"
 #include "assign1.h"
 
-
-
+extern int debug_flag;
 
 //need to return:
 // - a list of set_of_cubes + corresponding count
@@ -101,9 +100,11 @@ bool findMinCover (bool **coverTable, int numPIs, int numMinterms, t_blif_cubica
     bool colDomChanged  = true;
     bool done           = false;
 
-	printf("Initial Cover Table\n");
-    printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
-	printf("\n");
+    if (debug_flag) {
+	    printf("Initial Cover Table\n");
+        printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
+	    printf("\n");
+    }
 
     while( emptyChanged || ePIChanged || rowDomChanged || colDomChanged )
     {
@@ -114,7 +115,7 @@ bool findMinCover (bool **coverTable, int numPIs, int numMinterms, t_blif_cubica
 
         // [2] remove empty rows
         emptyChanged = removeEmptyRow(coverTable, numMinterms, numPIs, validPIs, validMinterms);
-        if(emptyChanged) {
+        if(emptyChanged && debug_flag) {
             printf("[Removed empty row]\n");
             printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
 			printf("\n");
@@ -122,7 +123,7 @@ bool findMinCover (bool **coverTable, int numPIs, int numMinterms, t_blif_cubica
 
         // [3] call findEssentialPIs
         ePIChanged = findEssentialPIs (coverTable, numMinterms, validMinterms, f->set_of_cubes, essentialPIs, EPIIndex, numPIs, validPIs);
-        if(ePIChanged) {
+        if(ePIChanged && debug_flag) {
             printf("[Removed essential PIs]\n");
             printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
 			printf("\n");
@@ -136,40 +137,47 @@ bool findMinCover (bool **coverTable, int numPIs, int numMinterms, t_blif_cubica
         // [5] call row dominance function
         rowDomChanged = removeDominatedRow (coverTable, numPIs, numMinterms, validPIs, validMinterms, f->input_count , f->set_of_cubes);
         if(rowDomChanged) {
-            printf("[Removed dominated rows]\n");
-            printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
-			printf("\n");
+            if (debug_flag) {
+                printf("[Removed dominated rows]\n");
+                printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
+			    printf("\n");
+            }
             // [6] try to findEssentialPIs again
             ePIChanged = findEssentialPIs (coverTable, numMinterms, validMinterms, f->set_of_cubes, essentialPIs, EPIIndex, numPIs, validPIs) || ePIChanged;
             if(isCovered (validMinterms, numMinterms)) {
                 done = true;
                 break;
             }
-            printf("[Removed essential PIs]\n");
-            printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
-			printf("\n");
+            if (debug_flag) {
+                printf("[Removed essential PIs]\n");
+                printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
+			    printf("\n");
+            }
         }
         // [7] call column dominance function
         colDomChanged = removeDominatedCol(coverTable, numPIs, numMinterms, validPIs, validMinterms);
         if(colDomChanged) {
-            printf("[Removed dominated columns]\n");
-            printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
-			printf("\n");
+            if (debug_flag) {
+                printf("[Removed dominated columns]\n");
+                printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
+			    printf("\n");
+            }
             // [8] try to findEssentialPIs again
             ePIChanged = findEssentialPIs (coverTable, numMinterms, validMinterms, f->set_of_cubes, essentialPIs, EPIIndex, numPIs, validPIs) || ePIChanged;
             if(isCovered (validMinterms, numMinterms)) {
                 done = true;
                 break;
             }
-            printf("[Removed essential PIs]\n");
-            printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
-			printf("\n");
+            if (debug_flag) {
+                printf("[Removed essential PIs]\n");
+                printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
+			    printf("\n");
+            }
         }
     }
-    if(!done) {
-    printf("%sBranch and bound%s\n", BYEL, KEND);
-
-    }
+    //if(!done) {
+    //printf("%sBranch and bound%s\n", BYEL, KEND);
+    //}
     //printf("final cover table\n");
     //printValidCoverTable(coverTable, numPIs, numMinterms, validPIs, validMinterms, minterms, f->set_of_cubes, f->input_count);
 
@@ -267,7 +275,7 @@ bool isCovered (bool *validMinterms, int numMinterms) {
 			return false;
 		}
 	}
-	printf(">>>>>> All minterms have been covered! <<<<<<\n\n");
+	//printf(">>>>>> All minterms have been covered! <<<<<<\n\n");
 	return true;
 }
 
@@ -366,7 +374,7 @@ bool removeDominatedCol(bool **coverTable, int numRows, int numCols, bool *valid
             if(isDominated) {
                 newValidMinterms[dominated] = false; 
                 changed = true;
-	            printf("Dominated col %d with col %d \n", dominated, dominator);
+	            //printf("Dominated col %d with col %d \n", dominated, dominator);
             }
 		}
 	}

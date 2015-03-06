@@ -385,17 +385,24 @@ void simplify_function(t_blif_cubical_function *f)
 /*** MAIN FUNCTION ****************************************************/
 /**********************************************************************/
 
+int debug_flag;
 
 int main(int argc, char* argv[])
 {
-	debug = false;
 	t_blif_logic_circuit *circuit = NULL;
 
-	if (argc != 2)
+	if (argc < 2 || argc > 3)
 	{
-		printf("Usage: %s <source BLIF file>\r\n", argv[0]);
+		printf("Usage: %s <source BLIF file> <--optional debug>\r\n", argv[0]);
 		return 0;
 	}
+
+    if (argc == 3) {
+        debug_flag = atoi(argv[2]);
+    } else {
+        debug_flag = 0;
+    }
+
 	printf("Quine-McCluskey 2-level logic minimization program.\r\n");
 
 	/* Read BLIF circuit. */
